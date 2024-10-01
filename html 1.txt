@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Budget Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .month {
+            border-bottom: 2px solid #ccc;
+            padding: 20px 0;
+        }
+
+        .balance, .income, .expenses {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+            .item input {
+                width: 70%;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+        .add-item {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+            margin-top: 10px;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+            .summary div {
+                width: 48%;
+            }
+
+            .summary input {
+                width: 100%;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+        .add-month {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+            .add-month button {
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+                .add-month button:hover {
+                    background-color: #0056b3;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="calendar">
+            <!-- Monthly budget sections will be appended here -->
+        </div>
+        <div class="add-month">
+            <button onclick="addMonth()">Add Month</button>
+        </div>
+    </div>
+
+    <script>
+        let monthCount = 0;
+
+        function addMonth() {
+            monthCount++;
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'month';
+            monthDiv.innerHTML = `
+                <h2>Month ${monthCount}</h2>
+                <div class="summary">
+                    <div>
+                        <h3 class="section-title">Start Balance</h3>
+                        <input type="number" placeholder="0.00" class="start-balance" oninput="updateBalances()">
+                    </div>
+                    <div>
+                        <h3 class="section-title">End Balance</h3>
+                        <input type="number" placeholder="0.00" class="end-balance" readonly>
+                    </div>
+                </div>
+                <div class="income">
+                    <h3 class="section-title">Income</h3>
+                    <div class="item">
+                        <input type="text" placeholder="Description">
+                        <input type="number" placeholder="Amount" class="income-amount" oninput="updateBalances()">
+                    </div>
+                    <div class="add-item" onclick="addItem(this, 'income')">Add Income</div>
+                </div>
+                <div class="expenses">
+                    <h3 class="section-title">Expenses</h3>
+                    <div class="item">
+                        <input type="text" placeholder="Description">
+                        <input type="number" placeholder="Amount" class="expense-amount" oninput="updateBalances()">
+                    </div>
+                    <div class="add-item" onclick="addItem(this, 'expenses')">Add Expense</div>
+                </div>
+            `;
+            document.getElementById('calendar').appendChild(monthDiv);
+            updateBalances();
+        }
+
+        function addItem(element, type) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.innerHTML = `
+                <input type="text" placeholder="Description">
+                <input type="number" placeholder="Amount" class="${type}-amount" oninput="updateBalances()">
+            `;
+            element.parentNode.insertBefore(itemDiv, element);
+        }
+
+        function updateBalances() {
+            const months = document.querySelectorAll('.month');
+            let previousEndBalance = 0;
+
+            months.forEach((month, index) => {
+                const startBalanceInput = month.querySelector('.start-balance');
+                const endBalanceInput = month.querySelector('.end-balance');
+                const incomeInputs = month.querySelectorAll('.income-amount');
+                const expenseInputs = month.querySelectorAll('.expense-amount');
+
+                let startBalance = parseFloat(startBalanceInput.value) || 0;
+                let totalIncome = 0;
+                let totalExpenses = 0;
+
+                incomeInputs.forEach(input => {
+                    totalIncome += parseFloat(input.value) || 0;
+                });
+
+                expenseInputs.forEach(input => {
+                    totalExpenses += parseFloat(input.value) || 0;
+                });
+
+                let endBalance = startBalance + totalIncome - totalExpenses;
+                endBalanceInput.value = endBalance.toFixed(2);
+
+                if (index > 0) {
+                    startBalanceInput.value = previousEndBalance.toFixed(2);
+                }
+
+                previousEndBalance = endBalance;
+            });
+        }
+
+        // Initial month
+        addMonth();
+    </script>
+</body>
+</html>
